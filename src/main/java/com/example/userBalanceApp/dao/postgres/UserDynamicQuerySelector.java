@@ -18,13 +18,13 @@ import java.util.Objects;
 import static com.example.userBalanceApp.constant.FieldName.*;
 
 @Component
-public class AccountDynamicQuerySelector {
+public class UserDynamicQuerySelector {
 
     private final EntityManager entityManager;
 
     private final CriteriaBuilder criteriaBuilder;
 
-    public AccountDynamicQuerySelector(EntityManager entityManager) {
+    public UserDynamicQuerySelector(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.criteriaBuilder = entityManager.getCriteriaBuilder();
     }

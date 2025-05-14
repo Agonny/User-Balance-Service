@@ -6,11 +6,10 @@ import com.example.userBalanceApp.filter.UserFilter;
 import com.example.userBalanceApp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -26,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getUsersByFilter(Pageable pageable, @Valid UserFilter filter) {
+    public Page<UserDto> getUsersByFilter(Pageable pageable, @Valid UserFilter filter) {
         return userService.getUsersByFilter(pageable, filter);
     }
 

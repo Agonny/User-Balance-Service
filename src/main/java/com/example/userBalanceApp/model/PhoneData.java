@@ -12,7 +12,7 @@ import static com.example.userBalanceApp.constant.SequenceName.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = TableName.PHONE_DATA)
-public class PhoneData {
+public class PhoneData implements UniqueData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = PHONE_DATA_GENERATOR)
@@ -25,5 +25,15 @@ public class PhoneData {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.DETACH})
     private User user;
+
+    @Override
+    public boolean isDataEquals(String qualifier) {
+        return phone.equals(qualifier);
+    }
+
+    @Override
+    public String getQualifier() {
+        return phone;
+    }
 
 }

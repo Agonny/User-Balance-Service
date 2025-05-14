@@ -13,7 +13,7 @@ import static com.example.userBalanceApp.constant.SequenceName.EMAIL_DATA_SEQUEN
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = TableName.EMAIL_DATA)
-public class EmailData {
+public class EmailData implements UniqueData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = EMAIL_DATA_GENERATOR)
@@ -27,4 +27,13 @@ public class EmailData {
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.DETACH})
     private User user;
 
+    @Override
+    public boolean isDataEquals(String qualifier) {
+        return email.equals(qualifier);
+    }
+
+    @Override
+    public String getQualifier() {
+        return email;
+    }
 }
