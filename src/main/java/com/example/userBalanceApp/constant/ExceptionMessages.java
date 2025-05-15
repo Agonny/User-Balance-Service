@@ -7,6 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ExceptionMessages {
 
+    EXPIRED_TOKEN("Your token has expired"),
+    INVALID_CREDENTIALS("Wrong credentials"),
+    INVALID_TOKEN("Wrong token"),
+    MISSING_TOKEN("Token not found"),
     INVALID_RECEIVER("Can't found receiver with current ID"),
     NEGATIVE_BALANCE("Transfer sum should be lesser than the balance of sender"),
     NEGATIVE_TRANSFER("Transfer sum should be a positive number"),

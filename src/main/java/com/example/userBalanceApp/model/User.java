@@ -16,6 +16,7 @@ import static com.example.userBalanceApp.constant.SequenceName.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = TableName.USER)
+@NamedEntityGraph(name = "user-with-full-data", attributeNodes = {@NamedAttributeNode(value = "emailData"), @NamedAttributeNode(value = "phoneData")})
 public class User {
 
     @Id

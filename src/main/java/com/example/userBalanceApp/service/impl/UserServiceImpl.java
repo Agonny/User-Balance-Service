@@ -13,6 +13,8 @@ import com.example.userBalanceApp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper = UserMapper.INSTANCE;
 
-    @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void updateUserData(UserUpdateDto dto) {
         Long id = 1L;
@@ -83,9 +84,23 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    @Override
     public Page<UserDto> getUsersByFilter(Pageable pageable, UserFilter filter) {
         return userMapper.toPageDto(userSelector.getUsersByFilter(filter, pageable));
+    }
+
+    public User getCurrentUser() {
+        Long id = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        return userRepository.findById(id).orElseThrow();
+    }
+
+//    @Override
+//    public UserDetailsService userDetailsService() {
+//        return this::getUserById();
+//    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow();
     }
 
 }
