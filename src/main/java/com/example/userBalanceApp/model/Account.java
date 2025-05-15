@@ -22,6 +22,10 @@ public class Account {
 
     private BigDecimal balance;
 
+    private BigDecimal initialBalance;
+
+    private BigDecimal maxIncrementBalance;
+
     @MapsId
     @JoinColumn(name = "id")
     @OneToOne(optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH}, fetch = FetchType.LAZY)
