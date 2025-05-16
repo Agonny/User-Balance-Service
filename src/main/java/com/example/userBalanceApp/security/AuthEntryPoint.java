@@ -1,6 +1,6 @@
 package com.example.userBalanceApp.security;
 
-import com.example.userBalanceApp.exception.ServiceExceptionHandler;
+import com.example.userBalanceApp.exception.handler.ServiceExceptionHandler;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

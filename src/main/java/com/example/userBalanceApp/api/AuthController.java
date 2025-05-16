@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Авторизация", description = "Содержит операции связанные с верификацией пользователей")
+@Tag(name = "Авторизация", description = "Содержит операции, связанные с верификацией пользователей")
 public class AuthController {
 
     private final AuthService authService;

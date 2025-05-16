@@ -1,5 +1,6 @@
-package com.example.userBalanceApp.exception;
+package com.example.userBalanceApp.exception.handler;
 
+import com.example.userBalanceApp.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ServiceException.class)
     ResponseEntity<Object> handleCustomConflict(ServiceException ex, WebRequest request) {
-        log.error("Unexpected exception occured  - [{}], message - [{}]", ex.getClass().getName(), ex.getMessage());
+        log.error("Custom exception occured - [{}], message - [{}]", ex.getClass().getName(), ex.getMessage());
 
         return super.handleExceptionInternal(ex, ex.getMessage(),
                 new HttpHeaders(), ex.getStatusCode(), request);
@@ -27,14 +28,14 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
         log.error("Unexpected exception occured - [{}], message - [{}]", ex.getClass().getName(), ex.getMessage());
-        ex.printStackTrace();
+
         return super.handleExceptionInternal(ex, UNEXPECTED_ERROR.getValue(),
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Object> handleAuthException(RuntimeException ex) {
-        log.error("Unexpected exception occured  - [{}], message - [{}]", ex.getClass().getName(), ex.getMessage());
+        log.error("Exception in authorization process - [{}], message - [{}]", ex.getClass().getName(), ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }

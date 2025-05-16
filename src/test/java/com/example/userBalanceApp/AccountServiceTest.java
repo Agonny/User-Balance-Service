@@ -1,6 +1,6 @@
 package com.example.userBalanceApp;
 
-import com.example.userBalanceApp.dao.postgres.AccountRepository;
+import com.example.userBalanceApp.dao.AccountRepository;
 import com.example.userBalanceApp.dto.TransferDto;
 import com.example.userBalanceApp.exception.InvalidReceiverException;
 import com.example.userBalanceApp.exception.NegativeBalanceException;
@@ -39,11 +39,11 @@ public class AccountServiceTest {
     @InjectMocks
     private BalanceServiceImpl balanceService;
 
-    private UserMapper userMapper = UserMapper.INSTANCE;
+    private final UserMapper userMapper = UserMapper.INSTANCE;
 
-    private BigDecimal firstBalance = BigDecimal.valueOf(210.14);
+    private final BigDecimal firstBalance = BigDecimal.valueOf(210.14);
 
-    private BigDecimal secondBalance = BigDecimal.valueOf(258.941);
+    private final BigDecimal secondBalance = BigDecimal.valueOf(258.941);
 
     @BeforeEach
     public void prepareRepository() {

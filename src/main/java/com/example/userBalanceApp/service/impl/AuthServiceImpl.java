@@ -1,6 +1,6 @@
 package com.example.userBalanceApp.service.impl;
 
-import com.example.userBalanceApp.dao.postgres.UserRepository;
+import com.example.userBalanceApp.dao.UserRepository;
 import com.example.userBalanceApp.dto.AuthenticationDto;
 import com.example.userBalanceApp.dto.JwtAuthenticationDto;
 import com.example.userBalanceApp.exception.ExpiredTokenException;
@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
 
-    private UserMapper userMapper = UserMapper.INSTANCE;
+    private final UserMapper userMapper = UserMapper.INSTANCE;
 
     @Override
     public void authorize(HttpServletRequest request, HttpServletResponse response, String token) {
@@ -126,11 +126,6 @@ public class AuthServiceImpl implements AuthService {
 
     private boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String userName = extractId(token);
-        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
 }

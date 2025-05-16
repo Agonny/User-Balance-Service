@@ -1,4 +1,4 @@
-package com.example.userBalanceApp.dao.postgres;
+package com.example.userBalanceApp.dao;
 
 import com.example.userBalanceApp.model.PhoneData;
 

@@ -1,8 +1,13 @@
 package com.example.userBalanceApp.service.impl;
 
-import com.example.userBalanceApp.dao.postgres.*;
+import com.example.userBalanceApp.dao.EmailDataRepository;
+import com.example.userBalanceApp.dao.PhoneDataRepository;
+import com.example.userBalanceApp.dao.UniqueDataRepository;
+import com.example.userBalanceApp.dao.UserRepository;
+import com.example.userBalanceApp.dao.selector.UserDynamicQuerySelector;
 import com.example.userBalanceApp.dto.UserDto;
 import com.example.userBalanceApp.dto.UserUpdateDto;
+import com.example.userBalanceApp.exception.WrongUserDataLengthException;
 import com.example.userBalanceApp.filter.UserFilter;
 import com.example.userBalanceApp.mapper.UserMapper;
 import com.example.userBalanceApp.model.EmailData;
@@ -27,11 +32,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.example.userBalanceApp.constant.ExceptionMessages.WRONG_EMAIL_DATA_LENGTH;
+import static com.example.userBalanceApp.constant.ExceptionMessages.WRONG_PHONE_DATA_LENGTH;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = "userCache")
 public class UserServiceImpl implements UserService {
+
+    private final int MAX_PHONE_LENGTH = 13;
+
+    private final int MAX_EMAIL_LENGTH = 200;
 
     private final UserRepository userRepository;
 
@@ -52,18 +64,26 @@ public class UserServiceImpl implements UserService {
         List<PhoneData> oldPhoneData = user.getPhoneData().stream().toList();
 
         user.setEmailData(new LinkedHashSet<>(mergeData(list -> {
-            for(String string : dto.getEmailData()) {
-                EmailData oldData = findSameData(string, oldEmailData);
+            for(String email : dto.getEmailData()) {
+                if(email.length() > MAX_EMAIL_LENGTH) {
+                    throw new WrongUserDataLengthException(WRONG_EMAIL_DATA_LENGTH.getValue());
+                }
 
-                list.add(Objects.requireNonNullElseGet(oldData, () -> new EmailData(null, string, user)));
+                EmailData oldData = findSameData(email, oldEmailData);
+
+                list.add(Objects.requireNonNullElseGet(oldData, () -> new EmailData(null, email, user)));
             }
         }, oldEmailData, emailDataRepository)));
 
         user.setPhoneData(new LinkedHashSet<>(mergeData(list -> {
-            for(String string : dto.getPhoneData()) {
-                PhoneData oldData = findSameData(string, oldPhoneData);
+            for(String number : dto.getPhoneData()) {
+                if(number.length() > MAX_PHONE_LENGTH) {
+                    throw new WrongUserDataLengthException(WRONG_PHONE_DATA_LENGTH.getValue());
+                }
 
-                list.add(Objects.requireNonNullElseGet(oldData, () -> new PhoneData(null, string, user)));
+                PhoneData oldData = findSameData(number, oldPhoneData);
+
+                list.add(Objects.requireNonNullElseGet(oldData, () -> new PhoneData(null, number, user)));
             }
         }, oldPhoneData, phoneDataRepository)));
 
@@ -71,6 +91,10 @@ public class UserServiceImpl implements UserService {
         log.info("User with ID [{}] successfully updated", id);
     }
 
+    /**
+     * Метод производит слияние новых данных со старыми если они повторяются.
+     * Старые данные, которых нет в новом списке, удаляются
+     */
     private <T extends UniqueData, R extends UniqueDataRepository> List<T> mergeData(Consumer<List<T>> operation, List<T> oldData, R repository) {
         List<T> newDataList = new ArrayList<>();
         List<T> deleteData = new ArrayList<>();

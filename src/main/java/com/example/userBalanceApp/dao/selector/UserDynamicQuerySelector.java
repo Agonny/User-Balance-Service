@@ -1,4 +1,4 @@
-package com.example.userBalanceApp.dao.postgres;
+package com.example.userBalanceApp.dao.selector;
 
 import com.example.userBalanceApp.filter.UserFilter;
 import com.example.userBalanceApp.model.User;

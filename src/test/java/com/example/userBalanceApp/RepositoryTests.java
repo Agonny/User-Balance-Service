@@ -1,7 +1,7 @@
 package com.example.userBalanceApp;
 
-import com.example.userBalanceApp.dao.postgres.AccountRepository;
-import com.example.userBalanceApp.dao.postgres.UserRepository;
+import com.example.userBalanceApp.dao.AccountRepository;
+import com.example.userBalanceApp.dao.UserRepository;
 import com.example.userBalanceApp.model.Account;
 import com.example.userBalanceApp.model.EmailData;
 import com.example.userBalanceApp.model.PhoneData;
