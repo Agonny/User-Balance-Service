@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -83,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtAuthenticationDto authenticate(AuthenticationDto dto) {
-        Optional<User> optional = userRepository.findUserByAuthenticationData(dto.getUserData(), dto.getPassword());
+        Optional<User> optional = userRepository.findUserByAuthenticationData(dto.getUserData());
 
         if(optional.isEmpty()) throw new InvalidCredentialsException();
 
@@ -109,6 +108,7 @@ public class AuthServiceImpl implements AuthService {
         if (userDetails instanceof User user) {
             claims.put("id", user.getId());
         }
+
         return generateToken(claims, userDetails);
     }
 
@@ -118,7 +118,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
-        final Claims claims = Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
+        final Claims claims = Jwts.parser()
+                .setSigningKey(getSigningKey()).build().parseClaimsJws(token)
                 .getBody();
         return claimsResolvers.apply(claims);
     }

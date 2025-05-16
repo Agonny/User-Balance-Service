@@ -1,13 +1,12 @@
 package com.example.userBalanceApp.exception;
 
 import com.example.userBalanceApp.constant.ExceptionMessages;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 
-public class ExpiredTokenException extends ServiceException {
+public class ExpiredTokenException extends AuthenticationException {
 
     public ExpiredTokenException() {
         super(ExceptionMessages.EXPIRED_TOKEN.getValue());
-        this.statusCode = HttpStatus.UNAUTHORIZED;
     }
 
 }

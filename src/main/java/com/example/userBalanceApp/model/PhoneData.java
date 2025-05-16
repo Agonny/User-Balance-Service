@@ -1,6 +1,7 @@
 package com.example.userBalanceApp.model;
 
 import com.example.userBalanceApp.constant.TableName;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,9 +22,10 @@ public class PhoneData implements UniqueData {
 
     private String phone;
 
+    @JsonBackReference
     @EqualsAndHashCode.Exclude
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.DETACH})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     private User user;
 
     @Override
@@ -34,6 +36,12 @@ public class PhoneData implements UniqueData {
     @Override
     public String getQualifier() {
         return phone;
+    }
+
+    @Override
+    public void dropUser() {
+        user.getPhoneData().remove(this);
+        this.setUser(null);
     }
 
 }

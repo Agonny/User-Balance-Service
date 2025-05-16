@@ -11,21 +11,26 @@ import com.example.userBalanceApp.model.UniqueData;
 import com.example.userBalanceApp.model.User;
 import com.example.userBalanceApp.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = "userCache")
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -38,24 +43,32 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper = UserMapper.INSTANCE;
 
+    @CacheEvict(cacheNames = "userDtos", allEntries = true)
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void updateUserData(UserUpdateDto dto) {
-        Long id = 1L;
+        Long id = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
         User user = userRepository.findById(id).orElseThrow();
+        List<EmailData> oldEmailData = user.getEmailData().stream().toList();
+        List<PhoneData> oldPhoneData = user.getPhoneData().stream().toList();
 
-        user.setEmailData(Set.copyOf(mergeData(list -> {
+        user.setEmailData(new LinkedHashSet<>(mergeData(list -> {
             for(String string : dto.getEmailData()) {
-                list.add(new EmailData(null, string, user));
-            }
-        }, user.getEmailData().stream().toList(), emailDataRepository)));
+                EmailData oldData = findSameData(string, oldEmailData);
 
-        user.setPhoneData(Set.copyOf(mergeData(list -> {
-            for(String string : dto.getPhoneData()) {
-                list.add(new PhoneData(null, string, user));
+                list.add(Objects.requireNonNullElseGet(oldData, () -> new EmailData(null, string, user)));
             }
-        }, user.getPhoneData().stream().toList(), phoneDataRepository)));
+        }, oldEmailData, emailDataRepository)));
+
+        user.setPhoneData(new LinkedHashSet<>(mergeData(list -> {
+            for(String string : dto.getPhoneData()) {
+                PhoneData oldData = findSameData(string, oldPhoneData);
+
+                list.add(Objects.requireNonNullElseGet(oldData, () -> new PhoneData(null, string, user)));
+            }
+        }, oldPhoneData, phoneDataRepository)));
 
         userRepository.save(user);
+        log.info("User with ID [{}] successfully updated", id);
     }
 
     private <T extends UniqueData, R extends UniqueDataRepository> List<T> mergeData(Consumer<List<T>> operation, List<T> oldData, R repository) {
@@ -67,9 +80,8 @@ public class UserServiceImpl implements UserService {
         for(T data : oldData) {
             T newData = findSameData(data.getQualifier(), newDataList);
             if(newData == null) {
+                data.dropUser();
                 deleteData.add(data);
-            } else {
-                newDataList.add(newDataList.indexOf(newData), data);
             }
         }
 
@@ -84,8 +96,11 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @CacheEvict(cacheNames = "userDtos", allEntries = true)
     public Page<UserDto> getUsersByFilter(Pageable pageable, UserFilter filter) {
-        return userMapper.toPageDto(userSelector.getUsersByFilter(filter, pageable));
+        Page<User> users = userSelector.getUsersByFilter(filter, pageable);
+
+        return new PageImpl<>(userMapper.toListDto(users.toList()), pageable, users.getTotalElements());
     }
 
     public User getCurrentUser() {
@@ -94,10 +109,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow();
     }
 
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        return this::getUserById();
-//    }
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        Optional<User> optional = userRepository.findById(Long.parseLong(username));
+        if (optional.isEmpty()) throw new UsernameNotFoundException(username);
+
+        return userMapper.toAuthUser(optional.get());
+    }
 
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow();

@@ -3,7 +3,6 @@ package com.example.userBalanceApp.dao.postgres;
 import com.example.userBalanceApp.filter.UserFilter;
 import com.example.userBalanceApp.model.User;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -40,8 +39,9 @@ public class UserDynamicQuerySelector {
         cq.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
         cq.orderBy(criteriaBuilder.asc(userRoot.get(ID.getValue())));
 
-        TypedQuery<User> q = entityManager.createQuery(cq);
-        List<User> results = q.setFirstResult((int) pageable.getOffset())
+        List<User> results = entityManager.createQuery(cq)
+                .setFirstResult((int) pageable.getOffset())
+                .setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph("user-with-full-data"))
                 .setMaxResults(pageable.getPageSize())
                 .getResultList();
 
@@ -74,16 +74,16 @@ public class UserDynamicQuerySelector {
         }
 
         if(Objects.nonNull(userFilter.getEmail())) {
-            root.fetch(EMAIL_DATA.getValue(), JoinType.LEFT);
+            root.join(EMAIL_DATA.getValue(), JoinType.LEFT);
             predicates.add(criteriaBuilder.equal(
-                    root.get(EMAIL_DATA.getValue()).get(EMAIL.getValue()), userFilter.getDateOfBirth())
+                    root.get(EMAIL_DATA.getValue()).get(EMAIL.getValue()), userFilter.getEmail())
             );
         }
 
         if(Objects.nonNull(userFilter.getPhone())) {
-            root.fetch(PHONE_DATA.getValue(), JoinType.LEFT);
+            root.join(PHONE_DATA.getValue(), JoinType.LEFT);
             predicates.add(criteriaBuilder.equal(
-                    root.get(PHONE_DATA.getValue()).get(PHONE.getValue()), userFilter.getDateOfBirth())
+                    root.get(PHONE_DATA.getValue()).get(PHONE.getValue()), userFilter.getPhone())
             );
         }
 

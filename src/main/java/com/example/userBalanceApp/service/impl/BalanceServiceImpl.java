@@ -52,8 +52,7 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     @Scheduled(fixedDelay = INCREASE_DELAY)
-    private void periodicBalanceIncrease() {
-        log.info("Setting new monthly limits");
+    public void periodicBalanceIncrease() {
         Set<Account> updatedAccounts = Collections.synchronizedSet(new HashSet<>());
         List<Account> accounts = accountRepository.findAll();
 
@@ -71,9 +70,9 @@ public class BalanceServiceImpl implements BalanceService {
                     newBalance = BigDecimal.valueOf(account.getMaxIncrementBalance().doubleValue());
                 }
                 account.setBalance(newBalance);
-            }
 
-            updatedAccounts.add(account);
+                updatedAccounts.add(account);
+            }
         }
 
         accountRepository.saveAll(updatedAccounts);
