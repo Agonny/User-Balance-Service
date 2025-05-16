@@ -17,7 +17,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        show_sql: true
   jwt:
     key: ${JWT_KEY}
     expiration: ${JWT_EXPIRATION}

@@ -18,7 +18,7 @@ public class BalanceController {
 
     private final BalanceService balanceService;
 
-    @PutMapping("/transfer")
+    @PostMapping("/transfer")
     @Operation(summary = "Перевод средств", description = "Позволяет произвести перевод средств с одного аккаунта на другой")
     public void transferValueToClient(@RequestBody @Valid TransferDto dto) {
         balanceService.transferValueToClient(dto);

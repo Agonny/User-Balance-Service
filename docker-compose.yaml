@@ -26,6 +26,11 @@ services:
       - "6379:6379"
     restart:
       on-failure
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   user-balance-service:
     container_name: user-balance-service
