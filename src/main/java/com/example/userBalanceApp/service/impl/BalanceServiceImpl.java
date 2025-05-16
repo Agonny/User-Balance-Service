@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.*;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 @Transactional(isolation = Isolation.REPEATABLE_READ)
 public class BalanceServiceImpl implements BalanceService {
@@ -39,6 +39,7 @@ public class BalanceServiceImpl implements BalanceService {
         if(dto.getValue().doubleValue() <= 0) throw new NegativeTransferException();
 
         Long id = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
+        log.info(id.toString());
         Account accountFrom = accountRepository.findById(id).orElseThrow();
         Account accountTo = accountRepository.findById(dto.getTransferTo()).orElseThrow(InvalidReceiverException::new);
 
